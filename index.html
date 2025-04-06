@@ -22,8 +22,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      color: #fff;
-     background-color: red;
+      background-color: #121212;
+      color: #FFFFFF;
       padding-top: 60px;
       position: relative;
     }
@@ -103,17 +103,27 @@
     }
 
     #installBtn {
-      display: none;
+      display: block;
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background-color: #2E7D32;
+      background-color: red;
       color: #fff;
       padding: 10px 20px;
       font-size: 1em;
       border: none;
       border-radius: 8px;
-      z-index: 999;
+      z-index: 9999;
+    }
+
+    #version {
+      position: fixed;
+      bottom: 5px;
+      left: 10px;
+      font-size: 0.9em;
+      color: white;
+      font-family: monospace;
+      z-index: 9999;
     }
   </style>
 </head>
@@ -132,17 +142,10 @@
   <div id="settingsPanel">
     <label>Forced Number: <input id="forcedNumber" type="text"></label><br>
     <label>Number of Laps: <input id="numLaps" type="number" min="1" value="3"></label>
-  <div id="version" style="
-  position: fixed;
-  bottom: 5px;
-  left: 10px;
-  font-size: 0.9em;
-  color: #888;
-  font-family: monospace;
-  z-index: 999;">
-  v1.04
   </div>
+
   <button id="installBtn">📲 Установить</button>
+  <div id="version">v1.04</div>
 
   <script>
     let startTime, interval;
