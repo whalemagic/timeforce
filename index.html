@@ -266,10 +266,25 @@
     });
 
     installBtn.addEventListener('click', () => {
+      if (!deferredPrompt) {
+        console.log("⚠️ deferredPrompt недоступен");
+        return;
+      }
+
       installBtn.style.display = 'none';
       deferredPrompt.prompt();
+
       deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('✅ Пользователь установил приложение');
+        } else {
+          console.log('❌ Пользователь отменил установку');
+          installBtn.style.display = 'block';
+        }
         deferredPrompt = null;
+      }).catch(err => {
+        console.error('Ошибка при попытке установки:', err);
+        installBtn.style.display = 'block';
       });
     });
   </script>
