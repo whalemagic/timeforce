@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>TimeForce Timer</title>
+  <title>Секундомер</title>
   <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#121212">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Секундомер">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap');
 
@@ -101,44 +105,6 @@
       background: transparent;
       display: none;
     }
-
-    #installBtn {
-      display: block;
-      position: fixed;
-      bottom: 60px;
-      right: 20px;
-      background-color: red;
-      color: #fff;
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 8px;
-      z-index: 9999;
-    }
-
-    #checkPromptBtn {
-      display: block;
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #555;
-      color: #fff;
-      padding: 10px 20px;
-      font-size: 0.9em;
-      border: none;
-      border-radius: 8px;
-      z-index: 9999;
-    }
-
-    #version {
-      position: fixed;
-      bottom: 5px;
-      left: 10px;
-      font-size: 0.9em;
-      color: white;
-      font-family: monospace;
-      z-index: 9999;
-    }
   </style>
 </head>
 <body>
@@ -158,10 +124,6 @@
     <label>Number of Laps: <input id="numLaps" type="number" min="1" value="3"></label>
   </div>
 
-  <button id="installBtn">📲 Установить</button>
-  <button id="checkPromptBtn">Проверить установку</button>
-  <div id="version">v1.05</div>
-
   <script>
     let startTime, interval;
     let running = false;
@@ -169,6 +131,7 @@
     let forcedChunks = [];
     let forcedLaps = 0;
     let lastVolumeUp = 0;
+    let deferredPrompt;
 
     function formatTime(ms) {
       let minutes = Math.floor(ms / 60000).toString().padStart(2, '0');
@@ -271,46 +234,9 @@
         .catch(err => console.error('Service Worker registration failed:', err));
     }
 
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-    const checkPromptBtn = document.getElementById('checkPromptBtn');
-
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = 'block';
-    });
-
-    installBtn.addEventListener('click', () => {
-      if (!deferredPrompt) {
-        alert("Установка невозможна: браузер не поддерживает установку PWA или условия не выполнены.");
-        console.log("⚠️ deferredPrompt недоступен");
-        return;
-      }
-
-      installBtn.style.display = 'none';
-      deferredPrompt.prompt();
-
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('✅ Пользователь установил приложение');
-        } else {
-          console.log('❌ Пользователь отменил установку');
-          installBtn.style.display = 'block';
-        }
-        deferredPrompt = null;
-      }).catch(err => {
-        console.error('Ошибка при попытке установки:', err);
-        installBtn.style.display = 'block';
-      });
-    });
-
-    checkPromptBtn.addEventListener('click', () => {
-      if (deferredPrompt) {
-        alert("✅ Установка доступна — нажмите кнопку 'Установить'");
-      } else {
-        alert("❌ Установка недоступна. Попробуйте перезагрузить сайт или использовать другой браузер.");
-      }
     });
   </script>
 </body>
