@@ -1,6 +1,6 @@
 {
-  "name": "TimeForce",
-  "short_name": "TimeForce",
+  "name": "Секундомер",
+  "short_name": "Секундомер",
   "start_url": "/timeforce/",
   "scope": "/timeforce/",
   "display": "standalone",
