@@ -1,12 +1,11 @@
 {
-  "name": "TimeForce Timer",
+  "name": "TimeForce",
   "short_name": "TimeForce",
-  "start_url": "/timeforce/index.html",
-  "scope": "/timeforce/"
+  "start_url": "/timeforce/",
+  "scope": "/timeforce/",
   "display": "standalone",
   "background_color": "#121212",
-  "theme_color": "#1E88E5",
-  "orientation": "portrait",
+  "theme_color": "#121212",
   "icons": [
     {
       "src": "icon-192.png",
@@ -20,3 +19,4 @@
     }
   ]
 }
+
