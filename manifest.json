@@ -1,7 +1,8 @@
 {
   "name": "TimeForce Timer",
   "short_name": "TimeForce",
-  "start_url": "./index.html",
+  "start_url": "/timeforce/index.html",
+  "scope": "/timeforce/"
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#1E88E5",
