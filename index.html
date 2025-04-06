@@ -37,6 +37,7 @@
       margin-bottom: 20px;
       letter-spacing: 2px;
       color: #FFFFFF;
+      text-shadow: 0 0 10px #00e676;
     }
 
     .controls {
@@ -120,8 +121,9 @@
   <div id="secretSettings"></div>
   <div id="overlay" onclick="toggleSettings(false)"></div>
   <div id="settingsPanel">
-    <label>Forced Number: <input id="forcedNumber" type="text"></label><br>
-    <label>Number of Laps: <input id="numLaps" type="number" min="1" value="3"></label>
+    <label>Число по умолчанию:<br><input id="defaultForced" type="text"></label><br>
+    <label>Число для текущего запуска:<br><input id="forcedNumber" type="text"></label><br>
+    <label>Кол-во кругов: <input id="numLaps" type="number" min="1" value="3"></label>
   </div>
 
   <script>
@@ -130,8 +132,8 @@
     let laps = [];
     let forcedChunks = [];
     let forcedLaps = 0;
-    let lastVolumeUp = 0;
-    let deferredPrompt;
+    let lastTapTime = 0;
+    let isMagicMode = false;
 
     function formatTime(ms) {
       let minutes = Math.floor(ms / 60000).toString().padStart(2, '0');
@@ -166,7 +168,8 @@
     }
 
     function prepareForcedChunks() {
-      let number = document.getElementById("forcedNumber").value;
+      const number = document.getElementById("forcedNumber").value || localStorage.getItem("defaultForced") || "";
+      document.getElementById("forcedNumber").value = number;
       forcedLaps = parseInt(document.getElementById("numLaps").value);
       forcedChunks = [];
       for (let i = 0; i < number.length; i += 3) {
@@ -180,17 +183,18 @@
       let elapsed = Date.now() - startTime;
       let minutes = Math.floor(elapsed / 60000).toString().padStart(2, '0');
       let seconds = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
-      let millis;
-      if (laps.length < forcedChunks.length) {
+      let millis = (elapsed % 1000).toString().padStart(3, '0');
+      if (isMagicMode && laps.length < forcedChunks.length) {
         millis = forcedChunks[laps.length];
-      } else {
-        millis = (elapsed % 1000).toString().padStart(3, '0');
       }
       let timeStr = `${minutes}:${seconds}.${millis}`;
       laps.push(timeStr);
+      navigator.vibrate?.(50);
       let div = document.createElement("div");
       div.textContent = `Lap ${laps.length}: ${timeStr}`;
       document.getElementById("laps").appendChild(div);
+      const result = laps.map(l => l.split('.')[1]).join('');
+      navigator.clipboard.writeText(result).catch(() => {});
     }
 
     const secretArea = document.getElementById("secretSettings");
@@ -201,8 +205,15 @@
         toggleSettings(true);
       }, 800);
     });
+
     secretArea.addEventListener("touchend", function() {
       clearTimeout(pressTimer);
+      const now = Date.now();
+      if (now - lastTapTime < 500) {
+        isMagicMode = !isMagicMode;
+        console.log("Режим:", isMagicMode ? "Фокусника" : "Обычный");
+      }
+      lastTapTime = now;
     });
 
     function toggleSettings(forceOpen = false) {
@@ -217,15 +228,8 @@
       }
     }
 
-    let lastKeyTime = 0;
-    window.addEventListener("keydown", function(e) {
-      if (e.key === "ArrowUp" || e.key === "VolumeUp") {
-        let now = Date.now();
-        if (now - lastKeyTime < 500) {
-          toggleSettings(true);
-        }
-        lastKeyTime = now;
-      }
+    document.getElementById("defaultForced").addEventListener("change", (e) => {
+      localStorage.setItem("defaultForced", e.target.value);
     });
 
     if ('serviceWorker' in navigator) {
@@ -233,11 +237,6 @@
         .then(reg => console.log('Service Worker registered'))
         .catch(err => console.error('Service Worker registration failed:', err));
     }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-    });
   </script>
 </body>
 </html>
