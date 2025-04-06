@@ -101,6 +101,20 @@
       z-index: 150;
       color: white;
     }
+
+    #installBtn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #2E7D32;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      z-index: 999;
+    }
   </style>
 </head>
 <body>
@@ -114,13 +128,12 @@
   </div>
 
   <div id="laps"></div>
-
   <div id="secretSettings"></div>
-
   <div id="settingsPanel">
     <label>Forced Number: <input id="forcedNumber" type="text"></label><br>
     <label>Number of Laps: <input id="numLaps" type="number" min="1" value="3"></label>
   </div>
+  <button id="installBtn">📲 Установить</button>
 
   <script>
     let startTime, interval;
@@ -190,7 +203,6 @@
       document.getElementById("laps").appendChild(div);
     }
 
-    // Secret menu trigger (long press)
     const secretArea = document.getElementById("secretSettings");
     let pressTimer;
 
@@ -212,7 +224,6 @@
       }
     }
 
-    // Volume key double press trigger (simulated for demo)
     let lastKeyTime = 0;
     window.addEventListener("keydown", function(e) {
       if (e.key === "ArrowUp" || e.key === "VolumeUp") {
@@ -223,15 +234,36 @@
         lastKeyTime = now;
       }
     });
-  </script>
 
-  <!-- ✅ Service Worker registration -->
-  <script>
+    // Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/timeforce/service-worker.js')
         .then(reg => console.log('Service Worker registered'))
         .catch(err => console.error('Service Worker registration failed:', err));
     }
+
+    // Install prompt logic
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', () => {
+      installBtn.style.display = 'none';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        deferredPrompt = null;
+      });
+    });
   </script>
 </body>
 </html>
