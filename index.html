@@ -2,10 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>TimeForce Timer</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap');
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
 
     body {
       font-family: 'Roboto Mono', monospace;
@@ -13,29 +21,35 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      height: 100vh;
-      margin: 0;
       background-color: #121212;
       color: #FFFFFF;
       padding-top: 60px;
     }
 
     #timer {
-      font-size: 5em;
+      font-size: 4em;
       margin-bottom: 20px;
       letter-spacing: 2px;
       color: #FFFFFF;
     }
 
+    .controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
     button {
-      font-size: 1.5em;
+      font-size: 1.2em;
       padding: 10px 30px;
-      margin: 10px;
+      margin: 5px;
       border: none;
       border-radius: 12px;
       background-color: #1E88E5;
       color: #FFFFFF;
       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+      width: 200px;
     }
 
     button:active {
@@ -91,8 +105,13 @@
 <body>
   <button id="showSettingsBtn" onclick="toggleSettings()">⚙️</button>
   <div id="timer">00:00.000</div>
-  <button onclick="toggleTimer()">Start/Stop</button>
-  <button onclick="addLap()">Lap</button>
+
+  <div class="controls">
+    <button onclick="toggleTimer()">Start/Stop</button>
+    <button onclick="addLap()">Lap</button>
+    <button onclick="resetTimer()">Reset</button>
+  </div>
+
   <div id="laps"></div>
 
   <div id="secretSettings"></div>
@@ -111,10 +130,9 @@
     let lastVolumeUp = 0;
 
     function formatTime(ms) {
-      let date = new Date(ms);
-      let minutes = String(date.getUTCMinutes()).padStart(2, '0');
-      let seconds = String(date.getUTCSeconds()).padStart(2, '0');
-      let milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
+      let minutes = Math.floor(ms / 60000).toString().padStart(2, '0');
+      let seconds = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+      let milliseconds = (ms % 1000).toString().padStart(3, '0');
       return `${minutes}:${seconds}.${milliseconds}`;
     }
 
@@ -135,26 +153,34 @@
       }
     }
 
+    function resetTimer() {
+      clearInterval(interval);
+      running = false;
+      document.getElementById("timer").textContent = "00:00.000";
+      document.getElementById("laps").innerHTML = "";
+      laps = [];
+    }
+
     function prepareForcedChunks() {
       let number = document.getElementById("forcedNumber").value;
       forcedLaps = parseInt(document.getElementById("numLaps").value);
       forcedChunks = [];
-      for (let i = 0; i < number.length; i += 2) {
-        forcedChunks.push(number.substring(i, i + 2));
+      for (let i = 0; i < number.length; i += 3) {
+        let chunk = number.substring(i, i + 3);
+        forcedChunks.push(chunk.padStart(3, '0'));
       }
     }
 
     function addLap() {
       if (!running) return;
       let elapsed = Date.now() - startTime;
-      let realTime = new Date(elapsed);
-      let minutes = String(realTime.getUTCMinutes()).padStart(2, '0');
-      let seconds = String(realTime.getUTCSeconds()).padStart(2, '0');
+      let minutes = Math.floor(elapsed / 60000).toString().padStart(2, '0');
+      let seconds = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
       let millis;
       if (laps.length < forcedChunks.length) {
         millis = forcedChunks[laps.length];
       } else {
-        millis = String(realTime.getUTCMilliseconds()).padStart(3, '0');
+        millis = (elapsed % 1000).toString().padStart(3, '0');
       }
       let timeStr = `${minutes}:${seconds}.${millis}`;
       laps.push(timeStr);
@@ -185,14 +211,15 @@
       }
     }
 
-    // Volume key double press trigger (only works on Android w/ special permissions or native wrapper)
+    // Volume key double press trigger (simulated for demo)
+    let lastKeyTime = 0;
     window.addEventListener("keydown", function(e) {
-      if (e.key === "VolumeUp") {
+      if (e.key === "ArrowUp" || e.key === "VolumeUp") {
         let now = Date.now();
-        if (now - lastVolumeUp < 500) {
+        if (now - lastKeyTime < 500) {
           toggleSettings(true);
         }
-        lastVolumeUp = now;
+        lastKeyTime = now;
       }
     });
   </script>
